@@ -1,9 +1,10 @@
 "use strict";
-const express = require("express"); // import express farmework
+const express = require("express"); 
 const server = express();
 const cors = require("cors");
 server.use(cors());
 
+server.use(express.json())
 require("dotenv").config();
 
 const mongoose = require("mongoose");
@@ -14,7 +15,7 @@ const PORT = process.env.PORT;
 mongoose.connect("mongodb://localhost:27017/booksDB", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}); // 1 - connect mongoose with DB
+}); 
 
 const booksSchema = new mongoose.Schema({
   title: String,
@@ -22,46 +23,56 @@ const booksSchema = new mongoose.Schema({
   status: String,
 });
 
-const bookModel = mongoose.model("book", booksSchema); //compile the schema iont a model
-
-//seed data (insert initial data)
-
-async function seedData() {
-  const firstBook = new bookModel({
-    title: "Catching Fire",
-    description: "Catching Fire is a 2009 science fiction young adult novel by the American novelist Suzanne Collins, the second book in The Hunger Games series.",
-    status: "Available",
-  });
-  const secondBook = new bookModel({
-    title: "Harry Potter and the Philosopher's Stone",
-    description: "",
-    status: "Available",
-  });
-  const thirdBook = new bookModel({
-    title: "Coveting Her",
-    description: "A short MC second chance romance with a man who is all alpha reunites with the woman who got away.",
-    status: "Available",
-  });
-
-  await firstBook.save();
-  await secondBook.save();
-  await thirdBook.save();
-}
-
-// seedData();
+const bookModel = mongoose.model("book", booksSchema); 
 
 // http://lovalhost/:port/books
 server.get("/books", getbooksHandler);
+server.post('/addBook', getAddBookHandler);
+server.delete('/deleteBook/:id',deleteBookHandler)
 
 function getbooksHandler(req, res) {
   bookModel.find({}, (err, result) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result)
       res.send(result);
     }
   });
+}
+
+
+async function getAddBookHandler(req,res){
+    // console.log(req.body)
+    const {bookTitle,bookDescription,bookStatus} = req.body
+    await bookModel.create({
+      title: bookTitle,
+      description: bookDescription,
+      status: bookStatus,
+    })
+    bookModel.find({},(err,result)=>{
+        if(err){
+            console.log(err)
+        }
+        else{
+            res.send(result)
+        }
+    })
+}
+
+
+function deleteBookHandler(req,res){
+  const bookId = req.params.id;
+  bookModel.deleteOne({_id:bookId},(err,result)=>{
+
+    bookModel.find({},(err,result)=>{
+          if(err){
+              console.log(err)
+          }
+          else{
+              res.send(result)
+          }
+      })
+  })
 }
 
 // http://localhost/:
