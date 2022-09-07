@@ -1,21 +1,16 @@
 "use strict";
-const express = require("express"); 
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
 const server = express();
-const cors = require("cors");
 server.use(cors());
-
 server.use(express.json())
-require("dotenv").config();
 
-const mongoose = require("mongoose");
-
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000 ;
 
 //mongoose config
-mongoose.connect("mongodb://localhost:27017/booksDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}); 
+mongoose.connect('mongodb://FarahEilouti:farah1234@ac-bjb772e-shard-00-00.uohp0je.mongodb.net:27017,ac-bjb772e-shard-00-01.uohp0je.mongodb.net:27017,ac-bjb772e-shard-00-02.uohp0je.mongodb.net:27017/?ssl=true&replicaSet=atlas-zx8gie-shard-0&authSource=admin&retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true}); // 1 - connect mongoose with DB 
 
 const booksSchema = new mongoose.Schema({
   title: String,
